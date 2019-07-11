@@ -270,47 +270,38 @@ function MOI.get(uf::UniversalFallback, attr::MOI.ConstraintName, ci::CI{F, S}) 
 end
 
 MOI.get(uf::UniversalFallback, ::Type{VI}, name::String) = MOI.get(uf.model, VI, name)
+
+check_type_and_multiple_names(::Type, ::Nothing, ::Nothing, name) = nothing
+check_type_and_multiple_names(::Type{T}, value::T, ::Nothing, name) where T = value
+check_type_and_multiple_names(::Type, ::Any, ::Nothing, name) where T = nothing
+check_type_and_multiple_names(::Type{T}, ::Nothing, value::T, name) where T = value
+check_type_and_multiple_names(::Type, ::Nothing, ::Any, name) where T = nothing
+function check_type_and_multiple_names(T::Type, ::Any, ::Any, name)
+    throw_multiple_name_error(T, name)
+end
 function MOI.get(uf::UniversalFallback, ::Type{CI{F, S}}, name::String) where {F, S}
     if uf.name_to_con === nothing
         uf.name_to_con = build_name_to_con_map(uf.con_to_name)
     end
-
     if MOI.supports_constraint(uf.model, F, S)
         ci = MOI.get(uf.model, CI{F, S}, name)
-        if ci !== nothing && haskey(uf.name_to_con, name)
-            error("Multiple constraints have the name $name.")
-        end
-        return ci
     else
-        ci = get(uf.name_to_con, name, nothing)
-        if ci == CI{Nothing, Nothing}(0)
-            error("Multiple constraints have the name $name.")
-        elseif ci isa CI{F, S}
-            return ci
-        else
-            return nothing
-        end
+        # There is no `F`-in-`S` constraint in `b.model`, `ci` is only got
+        # to check for duplicate names.
+        ci = MOI.get(uf.model, CI, name)
     end
+    ci_uf = get(uf.name_to_con, name, nothing)
+    throw_if_multiple_with_name(ci_uf, name)
+    return check_type_and_multiple_names(CI{F, S}, ci_uf, ci, name)
 end
 function MOI.get(uf::UniversalFallback, ::Type{CI}, name::String)
     if uf.name_to_con === nothing
         uf.name_to_con = build_name_to_con_map(uf.con_to_name)
     end
-
-    ci = MOI.get(uf.model, CI, name)
-    if ci === nothing
-        uf_ci = get(uf.name_to_con, name, nothing)
-        if uf_ci == CI{Nothing, Nothing}(0)
-            error("Multiple constraints have the name $name.")
-        else
-            return uf_ci
-        end
-    else
-        if haskey(uf.name_to_con, name)
-            error("Multiple constraints have the name $name.")
-        end
-        return ci
-    end
+    ci_uf = get(uf.name_to_con, name, nothing)
+    throw_if_multiple_with_name(ci_uf, name)
+    return check_type_and_multiple_names(
+        CI, ci_uf, MOI.get(uf.model, CI, name), name)
 end
 
 _set(uf, attr::MOI.AbstractOptimizerAttribute, value) = uf.optattr[attr] = value

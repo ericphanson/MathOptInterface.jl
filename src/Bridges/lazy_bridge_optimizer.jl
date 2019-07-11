@@ -205,11 +205,11 @@ function add_bridge(b::LazyBridgeOptimizer, BT::Type{<:Constraint.AbstractBridge
 end
 
 # It only bridges when the constraint is not supporting, hence the name "Lazy"
-function is_bridged(b::LazyBridgeOptimizer, F::Type{<:MOI.AbstractFunction}, S::Type{<:MOI.AbstractSet})
-    return !MOI.supports_constraint(b.model, F, S)
-end
 function is_bridged(b::LazyBridgeOptimizer, S::Type{<:MOI.AbstractSet})
     return !MOI.supports_constraint(b.model, variable_function_type(S), S)
+end
+function is_bridged(b::LazyBridgeOptimizer, F::Type{<:MOI.AbstractFunction}, S::Type{<:MOI.AbstractSet})
+    return !MOI.supports_constraint(b.model, F, S)
 end
 # Same as supports_constraint but do not trigger `update!`. This is
 # used inside `update!`.
@@ -220,16 +220,17 @@ function supports_no_update(b::LazyBridgeOptimizer, F::Type{<:MOI.AbstractFuncti
     return MOI.supports_constraint(b.model, F, S) || (F, S) in keys(b.constraint_best)
 end
 
-function supports_bridging_constraint(b::LazyBridgeOptimizer,
-                                      F::Type{<:Union{MOI.VectorOfVariables, MOI.SingleVariable}},
-                                      S::Type{<:MOI.AbstractSet})
+supports_constraint_bridges(::LazyBridgeOptimizer) = true
+function supports_bridging_constrained_variable(
+    b::LazyBridgeOptimizer, S::Type{<:MOI.AbstractSet}
+)
     update!(b, (S,))
-    update!(b, (F, S))
-    return (S,) in keys(b.variable_best) || (F, S) in keys(b.constraint_best)
+    return (S,) in keys(b.variable_best)
 end
-function supports_bridging_constraint(b::LazyBridgeOptimizer,
-                                      F::Type{<:MOI.AbstractFunction},
-                                      S::Type{<:MOI.AbstractSet})
+function supports_bridging_constraint(
+    b::LazyBridgeOptimizer, F::Type{<:MOI.AbstractFunction},
+    S::Type{<:MOI.AbstractSet}
+)
     update!(b, (F, S))
     return (F, S) in keys(b.constraint_best)
 end

@@ -31,21 +31,18 @@ function bridges(bridge::MOI.Bridges.AbstractBridgeOptimizer)
 end
 bridges(bridge::SingleBridgeOptimizer) = bridge.map
 
-function MOIB.supports_bridging_constraint(
-    b::SingleBridgeOptimizer{BT}, ::Type{MOI.SingleVariable},
-    S::Type{<:MOI.AbstractScalarSet}) where BT
+MOIB.supports_constraint_bridges(::SingleBridgeOptimizer) = false
+function MOIB.supports_bridging_constrained_variable(
+    ::SingleBridgeOptimizer{BT}, S::Type{<:MOI.AbstractSet}) where BT
     return supports_constrained_variable(BT, S)
 end
+function MOIB.is_bridged(b::SingleBridgeOptimizer, S::Type{<:MOI.AbstractSet})
+    return MOIB.supports_bridging_constrained_variable(b, S)
+end
 function MOIB.supports_bridging_constraint(
-    b::SingleBridgeOptimizer{BT}, ::Type{MOI.VectorOfVariables},
-    S::Type{<:MOI.AbstractVectorSet}) where BT
-    return supports_constrained_variable(BT, S)
-end
-function MOIB.is_bridged(b::SingleBridgeOptimizer, S::Type{<:MOI.AbstractScalarSet})
-    return MOIB.supports_bridging_constraint(b, MOI.SingleVariable, S)
-end
-function MOIB.is_bridged(b::SingleBridgeOptimizer, S::Type{<:MOI.AbstractVectorSet})
-    return MOIB.supports_bridging_constraint(b, MOI.VectorOfVariables, S)
+    ::SingleBridgeOptimizer, ::Type{<:MOI.AbstractFunction},
+    ::Type{<:MOI.AbstractSet})
+    return false
 end
 function MOIB.is_bridged(::SingleBridgeOptimizer,
                          ::Type{<:MOI.AbstractFunction},

@@ -279,6 +279,18 @@ function build_name_to_var_map(var_to_name::Dict{VI, String})
     return name_to_var
 end
 
+function throw_multiple_name_error(::Type{MOI.VariableIndex}, name::String)
+    error("Multiple variables have the name $name.")
+end
+function throw_multiple_name_error(::Type{<:MOI.ConstraintIndex}, name::String)
+    error("Multiple constraints have the name $name.")
+end
+function throw_if_multiple_with_name(::Nothing, ::String) end
+function throw_if_multiple_with_name(index::MOI.Index, name::String)
+    if iszero(index.value)
+        throw_multiple_name_error(typeof(index), name)
+    end
+end
 
 function MOI.get(model::AbstractModel, ::Type{VI}, name::String)
     if model.name_to_var === nothing
@@ -286,11 +298,8 @@ function MOI.get(model::AbstractModel, ::Type{VI}, name::String)
         model.name_to_var = build_name_to_var_map(model.var_to_name)
     end
     result = get(model.name_to_var, name, nothing)
-    if result == VI(0)
-        error("Multiple variables have the name $name.")
-    else
-        return result
-    end
+    throw_if_multiple_with_name(result, name)
+    return result
 end
 
 function MOI.get(model::AbstractModel, ::MOI.ListOfVariableAttributesSet)::Vector{MOI.AbstractVariableAttribute}
@@ -331,9 +340,8 @@ function MOI.get(model::AbstractModel, ConType::Type{<:CI}, name::String)
         model.name_to_con = build_name_to_con_map(model.con_to_name)
     end
     ci = get(model.name_to_con, name, nothing)
-    if ci == CI{Nothing, Nothing}(0)
-        error("Multiple constraints have the name $name.")
-    elseif ci isa ConType
+    throw_if_multiple_with_name(ci, name)
+    if ci isa ConType
         return ci
     else
         return nothing

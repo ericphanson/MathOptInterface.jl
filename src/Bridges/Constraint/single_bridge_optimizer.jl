@@ -24,17 +24,22 @@ function bridges(bridge::SingleBridgeOptimizer)
     return bridge.map
 end
 
+MOIB.supports_constraint_bridges(::SingleBridgeOptimizer) = true
+function MOIB.supports_bridging_constrained_variable(
+    ::SingleBridgeOptimizer, ::Type{<:MOI.AbstractSet})
+    return false
+end
+function MOIB.is_bridged(::SingleBridgeOptimizer, ::Type{<:MOI.AbstractSet})
+    return false
+end
 function MOIB.supports_bridging_constraint(
-    b::SingleBridgeOptimizer{BT}, F::Type{<:MOI.AbstractFunction},
+    ::SingleBridgeOptimizer{BT}, F::Type{<:MOI.AbstractFunction},
     S::Type{<:MOI.AbstractSet}) where BT
     return MOI.supports_constraint(BT, F, S)
 end
 function MOIB.is_bridged(b::SingleBridgeOptimizer, F::Type{<:MOI.AbstractFunction},
                     S::Type{<:MOI.AbstractSet})
     return MOIB.supports_bridging_constraint(b, F, S)
-end
-function MOIB.is_bridged(b::SingleBridgeOptimizer, S::Type{<:MOI.AbstractSet})
-    return false
 end
 function MOIB.bridge_type(::SingleBridgeOptimizer{BT},
                           ::Type{<:MOI.AbstractFunction},
