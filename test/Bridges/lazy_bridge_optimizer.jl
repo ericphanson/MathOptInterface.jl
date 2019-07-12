@@ -269,6 +269,14 @@ end
 
 @testset "Supports" begin
     full_bridged_mock = MOIB.full_bridge_optimizer(mock, Float64)
+    @testset "Mismatch vector/scalar" begin
+        for S in [MOI.Nonnegatives, MOI.Nonpositives, MOI.Zeros]
+            @test !MOI.supports_constraint(full_bridged_mock, MOI.SingleVariable, S)
+        end
+        for S in [MOI.GreaterThan{Float64}, MOI.LessThan{Float64}, MOI.EqualTo{Float64}]
+            @test !MOI.supports_constraint(full_bridged_mock, MOI.VectorOfVariables, S)
+        end
+    end
     greater_nonneg_mock = MOIU.MockOptimizer(GreaterNonnegModel{Float64}())
     full_bridged_greater_nonneg = MOIB.full_bridge_optimizer(
         greater_nonneg_mock, Float64)
