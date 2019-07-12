@@ -175,6 +175,12 @@ function MOI.is_valid(b::AbstractBridgeOptimizer, ci::MOI.ConstraintIndex{F, S})
 end
 function MOI.delete(b::AbstractBridgeOptimizer, vis::Vector{MOI.VariableIndex})
     if Constraint.has_bridges(Constraint.bridges(b))
+        # Delete all `MOI.VectorOfVariables` constraint of these variables
+        for ci in Constraint.variable_constraints(Constraint.bridges(b), vis)
+            if vis == MOI.get(b, MOI.ConstraintFunction(), ci).variables
+                MOI.delete(b, ci)
+            end
+        end
         # Delete all `MOI.SingleVariable` constraint of these variables
         for vi in vis
             for ci in Constraint.variable_constraints(Constraint.bridges(b), vi)

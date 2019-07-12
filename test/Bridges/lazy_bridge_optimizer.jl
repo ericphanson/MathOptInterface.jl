@@ -8,6 +8,18 @@ const MOIB = MathOptInterface.Bridges
 
 include("utilities.jl")
 
+MOIU.@model(
+    LPModel,
+    (), (MOI.EqualTo, MOI.GreaterThan, MOI.LessThan), (), (),
+    (), (MOI.ScalarAffineFunction,), (), ()
+)
+
+@testset "Name test" begin
+    model = LPModel{Float64}()
+    bridged = MOIB.full_bridge_optimizer(model, Float64)
+    MOIT.nametest(bridged)
+end
+
 # Model similar to SDPA format, it gives a good example because it does not
 # support a lot hence need a lot of bridges
 MOIU.@model(SDPAModel,

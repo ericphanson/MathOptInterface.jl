@@ -196,7 +196,7 @@ end
 """
     variable_constraints(map::Map, vi::MOI.VariableIndex)
 
-Return the list of all keys corresponding to [`MathOptInterface.SingleVariable`]
+Return the list of all keys corresponding to [`MathOptInterface.SingleVariable`](@ref)
 constraints on the variable `vi`.
 """
 function variable_constraints(map::Map, vi::MOI.VariableIndex)
@@ -204,6 +204,22 @@ function variable_constraints(map::Map, vi::MOI.VariableIndex)
     for key in keys(map.single_variable_constraints)
         if key[1] == vi.value
             push!(cis, MOI.ConstraintIndex{MOI.SingleVariable, key[2]}(vi.value))
+        end
+    end
+    return cis
+end
+
+"""
+    variable_constraints(map::Map, vis::Vector{MOI.VariableIndex})
+
+Return the list of all keys that *may* corresponding to
+[`MathOptInterface.VectorOfVariables`](@ref) constraints on the variables `vis`.
+"""
+function variable_constraints(map::Map, vis::Vector{MOI.VariableIndex})
+    cis = MOI.ConstraintIndex{MOI.VectorOfVariables}[]
+    for key in keys(map.vector_of_variables_constraints)
+        if key[1] == first(vis).value
+            push!(cis, MOI.ConstraintIndex{MOI.VectorOfVariables, key[2]}(key[1]))
         end
     end
     return cis
