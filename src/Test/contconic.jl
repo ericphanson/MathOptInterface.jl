@@ -786,11 +786,12 @@ function rotatedsoc3test(model::MOI.ModelLike, config::TestConfig; n=2, ub=3.0)
     cu2 = MOI.add_constraint(model, MOI.SingleVariable(u), MOI.LessThan(ub))
     @test cu2.value == u.value
     v = MOI.add_variable(model)
-    t1, ct1 = MOI.add_constrained_variable(model, MOI.EqualTo(1.0))
-    @test ct1.value == t1.value
-    t2, ct2 = MOI.add_constrained_variable(model, MOI.EqualTo(1.0))
-    @test ct2.value == t2.value
-    t = [t1, t2]
+    t = MOI.add_variables(model, 2)
+
+    ct1 = MOI.add_constraint(model, MOI.SingleVariable(t[1]), MOI.EqualTo(1.0))
+    @test ct1.value == t[1].value
+    ct2 = MOI.add_constraint(model, MOI.SingleVariable(t[2]), MOI.EqualTo(1.0))
+    @test ct2.value == t[2].value
 
     c1 = MOI.add_constraint(model, MOI.VectorAffineFunction(MOI.VectorAffineTerm.(1:(2+n), MOI.ScalarAffineTerm.([1/√2; 1/√2; ones(n)], [t; x])), zeros(2+n)), MOI.RotatedSecondOrderCone(2+n))
     c2 = MOI.add_constraint(model, MOI.VectorAffineFunction(MOI.VectorAffineTerm.([1, 2, 3], MOI.ScalarAffineTerm.([1/√2; 1/√2; 1.0], [x[1], u, v])), zeros(3)), MOI.RotatedSecondOrderCone(3))
