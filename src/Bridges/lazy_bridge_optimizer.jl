@@ -20,6 +20,8 @@ mutable struct LazyBridgeOptimizer{OT<:MOI.ModelLike} <: AbstractBridgeOptimizer
     constraint_map::Constraint.Map
     con_to_name::Dict{MOI.ConstraintIndex, String}
     name_to_con::Union{Dict{String, MOI.ConstraintIndex}, Nothing}
+    # Bridged objective
+    objective_map::Objective.Map
     # Bellman-Ford
     variable_bridge_types::Vector{Any} # List of types of available bridges
     variable_dist::Dict{Tuple{DataType}, Int}      # (S,) -> Number of bridges that need to be used for constrained variables in `S`
@@ -44,6 +46,9 @@ function Variable.bridges(bridge::LazyBridgeOptimizer)
 end
 function Constraint.bridges(bridge::LazyBridgeOptimizer)
     return bridge.constraint_map
+end
+function Objective.bridges(b::LazyBridgeOptimizer)
+    return bridge.objective_map
 end
 
 variable_function_type(::Type{<:MOI.AbstractScalarSet}) = MOI.SingleVariable
