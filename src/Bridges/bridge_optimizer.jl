@@ -439,11 +439,12 @@ function MOI.get(b::AbstractBridgeOptimizer,
     return unbridged_function(b, MOI.get(b.model, attr))
 end
 function MOI.set(b::AbstractBridgeOptimizer,
-                  attr::Union{MOI.AbstractModelAttribute,
-                              MOI.AbstractOptimizerAttribute},
-                  value)
+                 attr::Union{MOI.AbstractModelAttribute,
+                             MOI.AbstractOptimizerAttribute},
+                 value)
     return MOI.set(b.model, attr, bridged_function(b, value))
 end
+
 
 function _index(b::AbstractBridgeOptimizer, vi::MOI.VariableIndex)
     i = Variable.index_in_vector_of_variables(Variable.bridges(b), vi)
