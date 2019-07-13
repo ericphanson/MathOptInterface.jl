@@ -44,8 +44,8 @@ MOI.supports_constraint(::Type{<:AbstractBridge}, ::Type{<:MOI.AbstractFunction}
                                      F::Type{<:MOI.AbstractFunction},
                                      S::Type{<:MOI.AbstractSet})
 
-Return a list of the types of constrained variables that bridges of type `BT` add for
-bridging an `F`-in-`S` constraints. This fallbacks to
+Return a list of the types of constrained variables that bridges of type `BT`
+add for bridging an `F`-in-`S` constraints. This fallbacks to
 `added_constrained_variable_types(concrete_bridge_type(BT, F, S))`
 so bridges should not implement this method.
 """
