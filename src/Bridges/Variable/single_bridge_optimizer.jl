@@ -39,11 +39,6 @@ end
 function MOIB.is_bridged(b::SingleBridgeOptimizer, S::Type{<:MOI.AbstractSet})
     return MOIB.supports_bridging_constrained_variable(b, S)
 end
-function MOIB.supports_bridging_constraint(
-    ::SingleBridgeOptimizer, ::Type{<:MOI.AbstractFunction},
-    ::Type{<:MOI.AbstractSet})
-    return false
-end
 function MOIB.is_bridged(::SingleBridgeOptimizer,
                          ::Type{<:MOI.AbstractFunction},
                          ::Type{<:MOI.AbstractSet})

@@ -25,10 +25,6 @@ function bridges(bridge::SingleBridgeOptimizer)
 end
 
 MOIB.supports_constraint_bridges(::SingleBridgeOptimizer) = true
-function MOIB.supports_bridging_constrained_variable(
-    ::SingleBridgeOptimizer, ::Type{<:MOI.AbstractSet})
-    return false
-end
 function MOIB.is_bridged(::SingleBridgeOptimizer, ::Type{<:MOI.AbstractSet})
     return false
 end
