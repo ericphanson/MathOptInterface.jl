@@ -10,9 +10,10 @@ include("utilities.jl")
 include("bridge.jl")
 include("bridge_optimizer.jl")
 
+# Variable bridges
+include("Variable/Variable.jl")
 # Constraint bridges
 include("Constraint/Constraint.jl")
-include("Variable/Variable.jl")
 
 include("lazy_bridge_optimizer.jl")
 
