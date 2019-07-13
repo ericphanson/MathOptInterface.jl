@@ -31,6 +31,20 @@ Return a `Bool` indicating whether `b` tries to bridge constrained variables in
 """
 function is_bridged end
 
+"""
+    is_bridged(b::AbstractBridgeOptimizer, vi::MOI.VariableIndex)
+
+Return a `Bool` indicating whether `vi` is bridged. The variable is said to be
+bridged if it a variable of `b` but not a variable of `b.model`.
+"""
+is_bridged(::AbstractBridgeOptimizer, vi::MOI.VariableIndex) = vi.value < 0
+
+"""
+    is_bridged(b::AbstractBridgeOptimizer, ci::MOI.ConstraintIndex)
+
+Return a `Bool` indicating whether `ci` is bridged. The constraint is said to be
+bridged if it a constraint of `b` but not a constraint of `b.model`.
+"""
 function is_bridged(b::AbstractBridgeOptimizer,
                     ci::MOI.ConstraintIndex{F, S}) where {F, S}
     return is_bridged(b, F, S)
@@ -41,7 +55,6 @@ function is_bridged(b::AbstractBridgeOptimizer,
     # `ci.value < 0` if it is variable-bridged or force-bridged
     return is_bridged(b, F, S) || ci.value < 0
 end
-is_bridged(::AbstractBridgeOptimizer, vi::MOI.VariableIndex) = vi.value < 0
 
 """
     supports_bridging_constrained_variable(
@@ -100,6 +113,16 @@ function is_variable_bridged(
 end
 
 """
+    bridge(b::AbstractBridgeOptimizer, vi::MOI.VariableIndex)
+
+Return the `Variable.AbstractBridge` used to bridge the variable with index
+`vi`.
+"""
+function bridge(b::AbstractBridgeOptimizer, vi::MOI.VariableIndex)
+    return Variable.bridges(b)[vi]
+end
+
+"""
     bridge(b::AbstractBridgeOptimizer, ci::MOI.ConstraintIndex)
 
 Return the `AbstractBridge` used to bridge the constraint with index `ci`.
@@ -110,9 +133,6 @@ function bridge(b::AbstractBridgeOptimizer, ci::MOI.ConstraintIndex)
     else
         return Constraint.bridges(b)[ci]
     end
-end
-function bridge(b::AbstractBridgeOptimizer, vi::MOI.VariableIndex)
-    return Variable.bridges(b)[vi]
 end
 
 # Implementation of the MOI interface for AbstractBridgeOptimizer
