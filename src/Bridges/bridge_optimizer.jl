@@ -446,6 +446,7 @@ function MOI.set(b::AbstractBridgeOptimizer,
 end
 
 
+# Variable attributes
 function _index(b::AbstractBridgeOptimizer, vi::MOI.VariableIndex)
     i = Variable.index_in_vector_of_variables(Variable.bridges(b), vi)
     if iszero(i.value)
@@ -455,7 +456,6 @@ function _index(b::AbstractBridgeOptimizer, vi::MOI.VariableIndex)
     end
 end
 
-# Variable attributes
 function MOI.get(b::AbstractBridgeOptimizer,
                  attr::MOI.AbstractVariableAttribute,
                  index::MOI.VariableIndex)
